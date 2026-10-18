@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tiny-systems.example/course.schema.json",
+  "title": "Tiny Systems Course v1",
+  "description": "Portable microlearning content. Arrays determine lesson and card order. Stable IDs associate learning progress with content.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "id",
+    "title",
+    "description",
+    "lessons"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "title": {
+      "$ref": "#/$defs/text"
+    },
+    "description": {
+      "$ref": "#/$defs/text"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Optional metadata for future renderers."
+    },
+    "color": {
+      "type": "string",
+      "description": "Optional metadata for future renderers; the app uses its accessible shared palette."
+    },
+    "lessons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 365,
+      "items": {
+        "$ref": "#/$defs/lesson"
+      }
+    },
+    "contentRevision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Bundled curriculum release version. Existing authored lessons are preserved when newly introduced lessons are appended."
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+      "not": {
+        "enum": [
+          "constructor",
+          "prototype",
+          "__proto__"
+        ]
+      }
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "lesson": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "summary",
+        "category",
+        "minutes",
+        "cards",
+        "quiz"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "Must be unique within this course; enforced by the runtime validator."
+        },
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "summary": {
+          "$ref": "#/$defs/text"
+        },
+        "category": {
+          "$ref": "#/$defs/text"
+        },
+        "minutes": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 60
+        },
+        "cards": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 7,
+          "items": {
+            "$ref": "#/$defs/card"
+          }
+        },
+        "quiz": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/question"
+          }
+        },
+        "introducedInRevision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Release in which this bundled lesson first appeared. Stable IDs preserve progress."
+        },
+        "interview": {
+          "type": "object",
+          "required": [
+            "caseStudy",
+            "focus",
+            "context",
+            "part",
+            "parts"
+          ],
+          "properties": {
+            "caseStudy": {
+              "$ref": "#/$defs/text"
+            },
+            "focus": {
+              "$ref": "#/$defs/text"
+            },
+            "context": {
+              "$ref": "#/$defs/text"
+            },
+            "part": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Must not exceed parts; checked by the runtime validator."
+            },
+            "parts": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "card": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "body"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "hook",
+            "problem",
+            "explanation",
+            "visual",
+            "application",
+            "takeaway"
+          ]
+        },
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "body": {
+          "$ref": "#/$defs/text",
+          "description": "Plain text. Newline-separated blocks render as separate short explanation points."
+        },
+        "diagram": {
+          "$ref": "#/$defs/diagram"
+        },
+        "label": {
+          "type": "string",
+          "description": "Optional presentation label, such as Your spoken answer; falls back to type."
+        }
+      }
+    },
+    "diagram": {
+      "type": "object",
+      "required": [
+        "type",
+        "nodes"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "flow",
+            "fanout",
+            "compare"
+          ]
+        },
+        "nodes": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "caption": {
+          "type": "string"
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "required": [
+        "question",
+        "options",
+        "correctIndex",
+        "explanation"
+      ],
+      "properties": {
+        "question": {
+          "$ref": "#/$defs/text"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "correctIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Zero-based index. Must be less than options.length; enforced by the runtime validator."
+        },
+        "explanation": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    }
+  }
+}
